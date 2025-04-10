@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mvvm/core/widgets/custom_search_bar/custom_search_bar_anchor.dart';
+import 'package:mvvm/core/widgets/custom_search_bar/custom_search_controller.dart';
 import 'package:mvvm/core/widgets/custom_search_bar/search_bar_icon.dart';
 import 'package:mvvm/utils/app_colors.dart';
 
@@ -9,7 +11,7 @@ class CustomSearchBar extends StatefulWidget {
     this.height = 56,
     this.bgColor = AppColors.mono0,
     this.borderRadius = 28,
-    this.padding = const EdgeInsets.only(left: 16.0),
+    this.padding = EdgeInsets.zero,
     this.constraints = const BoxConstraints(maxWidth: 720),
     this.leftPadding = 25,
     this.leading = const SearchBarIcon(icons: [Icon(Icons.search, size: 24, color: Colors.grey)]),
@@ -19,29 +21,29 @@ class CustomSearchBar extends StatefulWidget {
   final double? width;
   final double height;
   final double borderRadius;
-  final BoxConstraints? constraints;
+  final BoxConstraints constraints;
   final double leftPadding;
-  final Color? bgColor;
+  final Color bgColor;
   final EdgeInsetsGeometry padding;
   final SearchBarIcon? trailing;
   final SearchBarIcon leading;
 
+  static CustomSearchBarAnchorState? of(BuildContext context) {
+    return context.findAncestorStateOfType<CustomSearchBarAnchorState>();
+  }
+
   @override
-  State<CustomSearchBar> createState() => _CustomSearchBarState();
+  State<CustomSearchBar> createState() => CustomSearchBarState();
 }
 
-class _CustomSearchBarState extends State<CustomSearchBar> {
-  TextEditingController? controller;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  // }
+class CustomSearchBarState extends State<CustomSearchBar> {
+  CustomSearchController? controller;
 
   @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    controller = CustomSearchBar.of(context)?.controller;
+    controller?.searchBar = this;
   }
 
   @override
@@ -56,7 +58,13 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         children: [
           widget.leading,
           Expanded(
-            child: TextField(controller: controller, decoration: InputDecoration(border: InputBorder.none, hintText: 'Search')),
+            child: TextField(
+              controller: controller,
+              decoration: InputDecoration(border: InputBorder.none, hintText: 'Search', hintStyle: TextStyle(color: Colors.grey)),
+              onTap: () {
+                controller?.open();
+              },
+            ),
           ),
           if (widget.trailing != null) widget.trailing! else SizedBox(width: widget.leftPadding),
         ],
@@ -65,8 +73,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   }
 
   BorderRadiusGeometry getBorderRadius() {
-    // assert(controller != null);
-
-    return BorderRadius.all(Radius.circular(widget.borderRadius));
+    assert(controller != null);
+    if (controller!.isOpen) {
+      return BorderRadius.only(topLeft: Radius.circular(widget.borderRadius), topRight: Radius.circular(widget.borderRadius));
+    } else {
+      return BorderRadius.all(Radius.circular(widget.borderRadius));
+    }
   }
 }

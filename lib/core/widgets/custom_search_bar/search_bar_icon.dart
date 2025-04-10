@@ -14,7 +14,7 @@ class SearchBarIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(padding: padding, child: Row(children: icons));
+    return Padding(padding: padding, child: Row(children: getIcons()));
   }
 
   List<Widget> getIcons() {
